@@ -1,0 +1,96 @@
+---
+title: "Calculation of uncertainty with MCM"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r}
+# Number of trials 
+M <- 10^6
+
+# PDFs of input quantities 
+uCr <- 0.003
+uVp1000 <- 0.00075 
+uVp500 <- 0.00075 
+uVp100 <- 0.0001
+uVp50 <- 0.0001 
+uVf10 <- 0.003 
+alpha <- 0.00149
+
+Vp1 <- rnorm(M, 1, uVp1000) 
+Vp0.5 <- rnorm(M, 0.5, uVp500) 
+Vp0.1 <- rnorm(M, 0.1, uVp100) 
+Vp0.05 <- rnorm(M, 0.05, uVp50) 
+Temp <- runif(M, 20, 30)
+Vf <- rnorm(M, 10, uVf10)*(1+alpha*(Temp-25)) 
+Cr <- rnorm(M, 1, uCr)
+```
+
+```{r}
+# Generate stock solution and calibration sample solutions 
+x0 <- rep(0, M)
+
+S1 <- Cr*rnorm(M, 1, uVp1000)/(rnorm(M, 10, uVf10)*(1+alpha*(Temp-25)))
+Sp <- 1/2*(S1*rnorm(M, 1, uVp1000) + S1*rnorm(M, 1, uVp1000))/(rnorm(M, 10, uVf10)*(1+alpha*(Temp-25)))
+
+C1 <- Sp*rnorm(M, 0.5, uVp500)/(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+ rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+
+                                  rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+ rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+ 
+                                  rnorm(M, 0.5,uVp500)+rnorm(M, 0.5, uVp500))
+X1 <- C1*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C2 <- C1*rnorm(M, 1, uVp1000)/(rnorm(M, 1, uVp1000)+rnorm(M, 1, uVp1000))
+X2 <- C2*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C3 <- C2*(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500))/(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+
+                                                          rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500))
+X3 <- C3*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C4 <- C3*rnorm(M, 1, uVp1000)/(rnorm(M, 1, uVp1000)+rnorm(M, 1, uVp1000))
+X4 <- C4*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C5 <- C4*rnorm(M, 1, uVp1000)/(rnorm(M, 1, uVp1000)+rnorm(M, 1, uVp1000))
+X5 <- C5*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C6 <- C5*(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500))/(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+
+                                                          rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500))
+X6 <- C6*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C7 <- C6*rnorm(M, 1, uVp1000)/(rnorm(M, 1, uVp1000)+rnorm(M, 1, uVp1000))
+X7 <- C7*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+
+C8 <- C7*(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500))/(rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+
+                                                          rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500)+rnorm(M, 0.5, uVp500))
+X8 <- C8*rnorm(M, 0.1, uVp100)/(rnorm(M, 0.05, uVp50)+rnorm(M, 0.05, uVp50)+rnorm(M, 0.1, uVp100))
+```
+
+```{r}
+# Calibration curve
+y1 <- rnorm(M, my1, sdy1) 
+y2 <- rnorm(M, my2, sdy2) 
+y3 <- rnorm(M, my3, sdy3) 
+y4 <- rnorm(M, my4, sdy4) 
+y5 <- rnorm(M, my5, sdy5) 
+y6 <- rnorm(M, my6, sdy6) 
+y7 <- rnorm(M, my7, sdy7)
+
+for(i in 1:M){
+  dat <- data.frame(x = 1000000*rev(c(X1[i], X2[i], X3[i], X4[i], X5[i], X6[i], X7[i])),
+                    y= c(y1[i], y2[i], y3[i], y4[i], y5[i], y6[i], y7[i])) 
+  fit <- lm(y~x, weight=1/x^2, data=dat)
+  x0[i] <- (y0 - fit$coefficients[1])/fit$coefficients[2] 
+  }
+
+```
+
+```{r}
+# Generate the measurand adding errors from method repeatability and dilution 
+x0.t <- x0 + rnorm(M, 0, urR*x0) + rnorm(M, 0, urD*x0)
+# mean
+mean(x0.t)
+# standard deviation
+sd(x0.t)
+# quantile
+quantile(x0.t, c(0.025, 0.975))
+```
